@@ -37,7 +37,7 @@ def main():
     recorder.finish(success=len(ledger.actions) == 1, confidence=.95, output=result)
     for _ in range(10):
         replay = Replay(recorder.run)
-        assert build_graph(lambda **kwargs: replay.call("refund", kwargs)).invoke({}) == result
+        assert build_graph(lambda _replay=replay, **kwargs: _replay.call("refund", kwargs)).invoke({}) == result
         replay.assert_consumed()
     assert len(ledger.actions) == 1  # Replays never touch the ledger.
     print(f"Committed refunds: {len(ledger.actions)}; recorded calls: {len(recorder.run.events)}; agent replays: 10/10")
