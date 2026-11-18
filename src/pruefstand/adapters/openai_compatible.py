@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from urllib.parse import urlparse
+from uuid import uuid4
 
-from ..privacy import endpoint_assessment
+from ..privacy import endpoint_assessment, scrub
 from ..recorder import Recorder
 
 
@@ -45,11 +46,15 @@ class OpenAICompatible:
             response.raise_for_status()
             return response.json()
 
+        identifier = uuid4().hex
+        # Keep digit groups short so numeric personal-data screening cannot alter this opaque ID.
+        call_id = "-".join(identifier[offset:offset + 8] for offset in range(0, 32, 8))
         result = self.recorder.call("chat.completions", dispatch,
                                     {"model": model, "messages": messages, "temperature": temperature, "max_tokens": max_tokens, **extra},
                                     kind="model", max_cost_eur=max_cost_eur,
-                                    attributes={"gen_ai.request.model": model, "gen_ai.operation.name": "chat", "endpoint": self.assessment})
-        event = self.recorder.run.events[-1]
+                                    attributes={"gen_ai.request.model": model, "gen_ai.operation.name": "chat", "endpoint": self.assessment,
+                                                "pruefstand.call.id": call_id})
+        event = next(e for e in self.recorder.run.events if e.attributes.get("pruefstand.call.id") == call_id)
         if isinstance(result, dict):
             usage = result.get("usage", {})
             for key, destination in (("prompt_tokens", "input_tokens"), ("completion_tokens", "output_tokens")):
@@ -57,5 +62,5 @@ class OpenAICompatible:
                 if type(count) is int and count >= 0:
                     setattr(event, destination, count)
             if isinstance(result.get("model"), str):
-                event.attributes["gen_ai.response.model"] = result["model"]
+                event.attributes["gen_ai.response.model"] = scrub(result["model"])[0]
         return result

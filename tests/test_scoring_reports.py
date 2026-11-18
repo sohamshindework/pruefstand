@@ -65,6 +65,12 @@ def test_calibration_uses_probabilities_and_held_out_labels():
         calibrate_judge([1.5], [True])
 
 
+@pytest.mark.parametrize("minimums", [{"safety": float("nan")}, {"safety": -1}, {"unknown": .9}])
+def test_invalid_gate_minimums_fail_closed(minimums):
+    with pytest.raises(ValueError):
+        gate({}, {}, minimums=minimums)
+
+
 def test_privacy_is_nested_and_never_includes_matched_text_in_findings():
     source = {"authorization": "Bearer secret", "customer": {"email": "test@example.test", "details": "DE89370400440532013000; Musterstraße 12; Diagnose Diabetes; 12345678901"}}
     cleaned, findings = scrub(source)

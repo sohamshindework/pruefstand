@@ -3,7 +3,7 @@ from typing import TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
-from pruefstand import ChaosPlan, Fault, InjectedFault, Recorder, Store
+from pruefstand import ChaosPlan, Fault, InjectedFault, Recorder, Replay, Store
 from pruefstand.adapters.langgraph import recorded_tools
 from pruefstand.scenarios import Ledger, load_tasks
 
@@ -19,21 +19,28 @@ def main():
                         chaos=ChaosPlan([Fault("timeout_after", at_call=1)]), metadata={"synthetic": True})
     tools = recorded_tools(recorder, {"refund": ledger.execute})
 
-    def refund_node(_state):
-        inputs = {"action": "refund", "amount": 49.9, "idempotency_key": "refund-test-001"}
-        try:
-            result = tools["refund"](**inputs)
-        except InjectedFault:
-            result = tools["refund"](**inputs)
-        return {"receipt": result}
+    def build_graph(refund):
+        def refund_node(_state):
+            inputs = {"action": "refund", "amount": 49.9, "idempotency_key": "refund-test-001"}
+            try:
+                result = refund(**inputs)
+            except InjectedFault:
+                result = refund(**inputs)
+            return {"receipt": result}
+        graph = StateGraph(State)
+        graph.add_node("refund", refund_node)
+        graph.add_edge(START, "refund")
+        graph.add_edge("refund", END)
+        return graph.compile()
 
-    graph = StateGraph(State)
-    graph.add_node("refund", refund_node)
-    graph.add_edge(START, "refund")
-    graph.add_edge("refund", END)
-    result = graph.compile().invoke({})
+    result = build_graph(tools["refund"]).invoke({})
     recorder.finish(success=len(ledger.actions) == 1, confidence=.95, output=result)
-    print(f"Committed refunds: {len(ledger.actions)}; recorded calls: {len(recorder.run.events)}")
+    for _ in range(10):
+        replay = Replay(recorder.run)
+        assert build_graph(lambda **kwargs: replay.call("refund", kwargs)).invoke({}) == result
+        replay.assert_consumed()
+    assert len(ledger.actions) == 1  # Replays never touch the ledger.
+    print(f"Committed refunds: {len(ledger.actions)}; recorded calls: {len(recorder.run.events)}; agent replays: 10/10")
 
 
 if __name__ == "__main__":

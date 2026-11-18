@@ -14,23 +14,25 @@ from pruefstand.cli import main
 from pruefstand.proxy import make_proxy
 
 
-def test_openai_compatible_adapter_sends_drift_records_usage_and_keeps_key_out_of_trace():
+@pytest.mark.parametrize("response_model", ["actual-model-v2", "person@example.test"])
+def test_openai_compatible_adapter_sends_drift_records_usage_and_keeps_key_out_of_trace(response_model):
     httpx = pytest.importorskip("httpx")
     observed = []
     def handler(request):
         observed.append(json.loads(request.content))
         assert request.headers["Authorization"] == "Bearer secret"
-        return httpx.Response(200, json={"model": "actual-model-v2", "choices": [{"message": {"content": "ok"}}], "usage": {"prompt_tokens": 12, "completion_tokens": 3}})
+        return httpx.Response(200, json={"model": response_model, "choices": [{"message": {"content": "ok"}}], "usage": {"prompt_tokens": 12, "completion_tokens": 3}})
     recorder = Recorder("agent", "task", chaos=ChaosPlan([Fault("model_swap", parameters={"model": "eu-model"})]))
     with httpx.Client(transport=httpx.MockTransport(handler)) as client:
         adapter = OpenAICompatible(recorder, base_url="https://eu.example.test/v1", api_key="secret", eu_hosts=["eu.example.test"], client=client)
         result = adapter.complete(model="original-model", messages=[{"role": "user", "content": "hello"}], max_cost_eur=.01)
     assert observed[0]["model"] == "eu-model"
-    assert result["model"] == "actual-model-v2"
+    assert result["model"] == response_model
     event = recorder.run.events[0]
     assert (event.input_tokens, event.output_tokens) == (12, 3)
     assert event.cost_eur == .01
     assert "secret" not in json.dumps(recorder.run.to_dict())
+    assert "person@example.test" not in json.dumps(recorder.run.to_dict())
     assert event.attributes["endpoint"]["declared_eu"]
     with pytest.raises(ValueError):
         OpenAICompatible(recorder, base_url="https://user:password@example.test")
@@ -46,6 +48,30 @@ def test_mcp_and_generic_tools_work_without_framework_dependency():
     result = asyncio.run(RecordedMCP(Session(), recorder).call_tool("double", {"a": 3}))
     assert result["result"] == 6
     assert recorder.run.events[-1].attributes["protocol"] == "mcp"
+
+
+def test_concurrent_model_usage_stays_attached_to_its_own_call():
+    httpx = pytest.importorskip("httpx")
+    from concurrent.futures import ThreadPoolExecutor
+    slow_started, fast_started = threading.Event(), threading.Event()
+    def handler(request):
+        model = json.loads(request.content)["model"]
+        if model == "slow":
+            slow_started.set()
+            assert fast_started.wait(5)
+        else:
+            fast_started.set()
+        return httpx.Response(200, json={"model": model, "usage": {"prompt_tokens": 11 if model == "slow" else 22}})
+    recorder = Recorder("agent", "concurrent")
+    with httpx.Client(transport=httpx.MockTransport(handler)) as client, ThreadPoolExecutor(2) as executor:
+        adapter = OpenAICompatible(recorder, client=client)
+        slow = executor.submit(adapter.complete, model="slow", messages=[])
+        assert slow_started.wait(5)
+        fast = executor.submit(adapter.complete, model="fast", messages=[])
+        slow.result(timeout=5)
+        fast.result(timeout=5)
+    observed = {event.inputs["model"]: event.input_tokens for event in recorder.run.events}
+    assert observed == {"slow": 11, "fast": 22}
 
 
 def test_otel_exports_error_and_usage_to_configured_tracer():

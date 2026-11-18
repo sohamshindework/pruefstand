@@ -129,6 +129,10 @@ def gate(baseline: dict, candidate: dict, *, max_drop: float = .05, min_runs: in
          min_tasks: int = 3, minimums: dict | None = None) -> dict:
     if not 0 <= max_drop <= 1 or min_runs < 1 or min_tasks < 1:
         raise ValueError("Invalid gate configuration")
+    if minimums is not None and (not isinstance(minimums, dict) or set(minimums) - set(METRICS)):
+        raise ValueError("Minimums must map known metric names to probabilities")
+    if any(type(v) not in (int, float) or not math.isfinite(v) or not 0 <= v <= 1 for v in (minimums or {}).values()):
+        raise ValueError("Minimum score thresholds must be finite and in [0,1]")
     failures, changes = [], []
     for document in (baseline, candidate):
         if document.get("n_runs", 0) < min_runs or document.get("n_tasks", 0) < min_tasks:

@@ -68,6 +68,8 @@ class Recorder:
             effective = request_fault(inputs, fault)
             safe_inputs, findings = scrub(effective, redact=self.redact)
             safe_attrs, attr_findings = scrub(attributes or {}, redact=self.redact)
+            if kind == "model" and isinstance(safe_inputs, dict) and isinstance(safe_inputs.get("model"), str):
+                safe_attrs["gen_ai.request.model"] = safe_inputs["model"]
             event = Event(sequence=sequence, kind=kind, name=name, inputs=safe_inputs,
                           fault=fault.name if fault else None, attributes=safe_attrs,
                           privacy_findings=findings + attr_findings)

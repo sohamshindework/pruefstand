@@ -68,6 +68,9 @@ function hydrate(value) {
     $('#condition-filter').append(option);
   }
   const synthetic = data.profiles.every(p => p.synthetic);
+  $('.experiment-bar strong').textContent = synthetic ? 'CrashBench / Enterprise DE' : 'Imported experiment';
+  $('.experiment-bar .chip').textContent = `${new Set(data.traces.map(r => r.task_id)).size} workflows`;
+  $('.experiment-bar code').textContent = data.profiles[0].seed ?? '—';
   $('.local-badge').lastChild.textContent = synthetic ? ' Synthetic benchmark' : ' Imported experiment';
   $('.notice strong').textContent = synthetic ? 'A transparent starting point.' : 'Imported experiment.';
   $('.notice span:nth-child(2)').childNodes[1].textContent = synthetic ? ' These are executable fixture agents, not ratings of third-party frameworks. ' : ' Results are supplied by the imported file. Check provenance and evaluation scope before using them. ';
