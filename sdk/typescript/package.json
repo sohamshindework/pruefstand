@@ -1,0 +1,11 @@
+{
+  "name": "@pruefstand/sdk",
+  "version": "0.1.0",
+  "description": "Typed Node.js recorder and offline replay for Prüfstand traces",
+  "type": "module",
+  "exports": "./src/index.ts",
+  "engines": {"node": ">=22.18.0"},
+  "scripts": {"test": "node --test test/*.test.ts"},
+  "license": "Apache-2.0",
+  "private": true
+}

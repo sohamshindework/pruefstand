@@ -1,0 +1,22 @@
+name: Good first fault
+description: Propose a reproducible agent failure mode
+title: '[Fault] '
+labels: ['enhancement']
+body:
+  - type: textarea
+    id: observation
+    attributes:
+      label: Observable failure and expected behavior
+      description: Use synthetic data. Do not disclose vulnerabilities in third-party systems publicly.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal fixture and reproduction steps
+    validations:
+      required: true
+  - type: textarea
+    id: evaluation
+    attributes:
+      label: Independent outcome / harm check

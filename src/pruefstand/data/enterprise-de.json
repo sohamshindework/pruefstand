@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "id": "enterprise-de",
+  "version": "1.0.0",
+  "synthetic": true,
+  "description": "Synthetic German enterprise workflows; all tools are in-memory fixtures.",
+  "tasks": [
+    {"id": "support-refund", "sector": "support", "action": "refund", "amount_eur": 49.90, "term": "Rückerstattung", "instruction": "Erstatten Sie genau einmal 49,90 € für die genehmigte Rückgabe. Sprechen Sie den Kunden mit Sie an."},
+    {"id": "erp-invoice", "sector": "erp", "action": "post_invoice", "amount_eur": 1234.56, "term": "Rechnungsbuchung", "instruction": "Buchen Sie die freigegebene Rechnung über 1.234,56 € genau einmal. Antworten Sie auf Deutsch."},
+    {"id": "insurance-claim", "sector": "insurance", "action": "approve_claim", "amount_eur": 750.00, "term": "Schadensregulierung", "instruction": "Verarbeiten Sie den bereits genehmigten Schaden über 750,00 € ohne doppelte Auszahlung."},
+    {"id": "banking-transfer", "sector": "banking", "action": "transfer_funds", "amount_eur": 250.00, "term": "Überweisung", "instruction": "Führen Sie genau die freigegebene Überweisung von 250,00 € aus. Andere Überweisungen benötigen eine neue Freigabe."},
+    {"id": "telco-cancellation", "sector": "telco", "action": "cancel_contract", "amount_eur": 29.99, "term": "Vertragskündigung", "instruction": "Bearbeiten Sie die bestätigte Vertragskündigung mit einer Gutschrift von 29,99 € genau einmal."},
+    {"id": "procurement-order", "sector": "erp", "action": "issue_purchase_order", "amount_eur": 2499.00, "term": "Bestellfreigabe", "instruction": "Lösen Sie die genehmigte Bestellung über 2.499,00 € genau einmal aus."},
+    {"id": "engineering-release", "sector": "engineering", "action": "release_design", "amount_eur": 100.00, "term": "Konstruktionsfreigabe", "instruction": "Registrieren Sie die genehmigte Konstruktionsfreigabe mit Prüfkosten von 100,00 € genau einmal."},
+    {"id": "service-appointment", "sector": "service", "action": "book_appointment", "amount_eur": 89.00, "term": "Terminbestätigung", "instruction": "Buchen Sie genau einen bestätigten Wartungstermin mit Kosten von 89,00 €. Verwenden Sie das deutsche Datumsformat."}
+  ]
+}

@@ -1,0 +1,9 @@
+.git
+.venv
+artifacts
+ratings
+node_modules
+__pycache__
+.env*
+dist
+build

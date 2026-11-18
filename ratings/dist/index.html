@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="An open crash-test lab for AI agents. Inspect reproducible failures, deterministic replay, and reliability evidence.">
+  <meta name="theme-color" content="#111b18">
+  <title>Prüfstand — Agent Reliability Lab</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <aside class="sidebar">
+    <a href="#overview" class="brand" aria-label="Prüfstand home"><span class="brand-mark">P<span>↗</span></span><span>prüfstand<span class="brand-sub">AGENT RELIABILITY LAB</span></span></a>
+    <div class="workspace"><span class="workspace-icon">S</span><div>Soham’s laboratory<small>Open-source workspace</small></div><span class="muted">⌄</span></div>
+    <div class="nav-label">LABORATORY</div>
+    <nav aria-label="Main navigation">
+      <a href="#overview" data-view="overview"><span>◫</span>Overview</a>
+      <a href="#recorder" data-view="recorder"><span>≋</span>Flight recorder<span class="nav-count" id="trace-count">—</span></a>
+      <a href="#faults" data-view="faults"><span>ϟ</span>Fault library<span class="nav-count">20</span></a>
+      <a href="#evidence" data-view="evidence"><span>▤</span>Evidence & impact</a>
+      <a href="#methodology" data-view="methodology"><span>⌘</span>Methodology</a>
+    </nav>
+    <div class="sidebar-bottom"><div class="lab-status"><span class="dot"></span> REPRODUCIBLE BY DESIGN</div><p>Every failure leaves evidence.</p><a href="https://github.com/sohamshindework/pruefstand" target="_blank" rel="noreferrer">GitHub repository <span>↗</span></a><div class="version">APACHE 2.0 <span>v0.1.0</span></div></div>
+  </aside>
+  <div class="app-shell">
+    <header class="topbar"><div><span class="muted">Laboratory</span><span class="slash">/</span><span id="breadcrumb">Overview</span></div><div class="top-actions"><span class="local-badge"><span class="dot"></span> Synthetic benchmark</span><button class="icon-button" id="import-button" aria-label="Import experiment JSON">↥ <span>Import run</span></button><input id="import-file" type="file" accept="application/json,.json" hidden><span class="avatar">SS</span></div></header>
+    <main id="main">
+      <div class="notice"><span class="notice-icon">i</span><span><strong>A transparent starting point.</strong> These are executable fixture agents, not ratings of third-party frameworks. <a href="#methodology">See what is measured ↗</a></span></div>
+      <section class="view" id="view-overview">
+        <div class="page-heading"><div><div class="eyebrow">KNOW BEFORE YOU SHIP</div><h1>Reliability, under pressure.</h1><p>Your agent works in the demo. Find out what happens in the real world.</p></div><button class="button primary" id="demo-button"><span>▷</span> Replay crash test</button></div>
+        <div class="experiment-bar"><div><span class="experiment-icon">⌁</span><strong>CrashBench / Enterprise DE</strong><span class="chip">8 workflows</span></div><div><span class="muted small">SEED</span><code>42</code><span class="divider"></span><span class="muted small">COMPARE</span><select id="agent-select" aria-label="Select agent"></select></div></div>
+        <div class="metric-grid" id="metric-grid" aria-live="polite"></div>
+        <div class="overview-grid">
+          <section class="panel profile-panel"><div class="panel-header"><div><h2>The reliability profile</h2><p>Four dimensions. One clearer picture.</p></div><span class="chip mono">0 — 1 SCALE</span></div><div class="chart-legend"><span><i class="legend-color lime"></i>Idempotent agent</span><span><i class="legend-color gray"></i>Vulnerable retry</span></div><div id="profile-chart" class="profile-chart"></div><div class="panel-foot"><span>95% task-cluster bootstrap intervals</span><a href="#methodology">Metric definitions ↗</a></div></section>
+          <section class="panel crash-panel"><div class="panel-header"><div><div class="eyebrow">THE FAILURE THAT STARTED IT</div><h2>One timeout. Two refunds.</h2></div><span class="fault-icon">ϟ</span></div><p>A refund commits. Its acknowledgement times out. A retry pays the customer again.</p><div class="mini-trace"><div><span class="mini-node good"></span><code>refund(49.90)</code><span class="pill pass">COMMITTED</span></div><div><span class="mini-node bad"></span><code>response lost</code><span class="pill fail">TIMEOUT</span></div><div><span class="mini-node bad"></span><code>retry → refund(49.90)</code><span class="pill fail">DUPLICATE</span></div></div><div class="crash-bottom"><div><small>UNNECESSARY LOSS / RUN</small><strong>€49.90</strong></div><button class="text-button" id="inspect-refund">Inspect trace ↗</button></div></section>
+        </div>
+        <section class="panel fault-performance"><div class="panel-header"><div><h2>Where agents break</h2><p>Observed task success by fault. Same workflows, same schedule.</p></div><a class="text-link" href="#faults">Explore fault library ↗</a></div><div id="fault-chart"></div></section>
+        <section class="panel recent-panel"><div class="panel-header"><div><h2>Recent crash tests</h2><p>A representative trace from each condition.</p></div><a href="#recorder" class="text-link">Open flight recorder ↗</a></div><div class="table-scroll"><table><thead><tr><th>WORKFLOW</th><th>AGENT</th><th>CONDITION</th><th>RESULT</th><th>OBSERVED LOSS</th><th></th></tr></thead><tbody id="recent-runs"></tbody></table></div></section>
+      </section>
+      <section class="view" id="view-recorder" hidden>
+        <div class="page-heading"><div><div class="eyebrow">EVERY STEP, ACCOUNTED FOR</div><h1>Flight recorder</h1><p>Inspect the tool call, the fault, and the actual consequence.</p></div><button class="button secondary" id="export-button">↓ Export experiment</button></div>
+        <div class="filters"><label>Search<input id="trace-search" placeholder="Task, agent, or run ID…" type="search"></label><label>Condition<select id="condition-filter"><option value="">All conditions</option></select></label><label>Verdict<select id="verdict-filter"><option value="">All results</option><option value="fail">Failed</option><option value="pass">Passed</option></select></label><span id="filter-count" class="muted small"></span></div>
+        <div class="recorder-layout"><div class="panel trace-list" id="trace-list"></div><section class="panel trace-detail" id="trace-detail" aria-live="polite"><div class="empty-state">Select a run to inspect its trace.</div></section></div>
+      </section>
+      <section class="view" id="view-faults" hidden>
+        <div class="page-heading"><div><div class="eyebrow">CONTROLLED CHAOS</div><h1>A library of bad days.</h1><p>Twenty seeded faults across infrastructure, data, adversarial input, and drift.</p></div><span class="chip mono">CRASHBENCH v1</span></div>
+        <div class="category-tabs" id="fault-tabs" role="group" aria-label="Filter fault category"><button class="active" data-category="">All faults</button><button data-category="infrastructure">Infrastructure</button><button data-category="data">Data quality</button><button data-category="adversarial">Adversarial</button><button data-category="drift">Environment drift</button></div><div class="fault-cards" id="fault-cards"></div>
+      </section>
+      <section class="view" id="view-evidence" hidden>
+        <div class="page-heading"><div><div class="eyebrow">FROM FAILURES TO DECISIONS</div><h1>Evidence that travels.</h1><p>Technical evidence for your engineering, risk, and governance teams.</p></div><a class="button secondary" href="https://github.com/sohamshindework/pruefstand/blob/main/docs/germany.md" target="_blank" rel="noreferrer">Read the German guide ↗</a></div>
+        <div class="evidence-grid"><section class="panel"><div class="panel-header"><div><h2>Reliability impact calculator</h2><p>Translate the observed test distribution into a cost scenario.</p></div></div><div class="calculator"><label>Agent<select id="roi-agent"></select></label><label>Monthly workflow volume<input id="roi-volume" type="number" min="1" max="100000000" value="50000"></label><label>Manual review cost (€ / failed run)<input id="roi-review" type="number" min="0" max="100000" step="0.50" value="2"></label><div id="roi-result" aria-live="polite"></div><p class="small muted">Assumes production has the same fault frequency as this stress test. Reweight with production incident rates before budgeting. This is a scenario estimate.</p></div></section><section class="panel"><div class="panel-header"><div><h2>AI governance evidence pack</h2><p>Traceable observations. Explicit limitations.</p></div><span class="chip">ZIP + SHA-256</span></div><ul class="evidence-checks"><li><span>↳</span><div>Flight recorder & test outcomes<small>Sanitized JSONL with versioned schemas</small></div></li><li><span>↳</span><div>Robustness & accuracy profile<small>Scores, sample sizes, and uncertainty</small></div></li><li><span>↳</span><div>Disclosure & oversight observations<small>German task checks and approval events</small></div></li><li><span>↳</span><div>Data screening findings<small>IBAN, Steuer-ID candidates, addresses, health terms</small></div></li><li><span>↳</span><div>Integrity manifest<small>SHA-256 digest for every evidence file</small></div></li></ul><div class="panel-foot"><code>pruefstand evidence --help</code></div></section></div>
+        <div class="callout"><strong>Evidence is a starting point for review.</strong><p>Pattern screening does not establish GDPR compliance. A declared EU endpoint does not prove data residency. This evidence pack is technical test output, not legal advice or certification.</p></div>
+      </section>
+      <section class="view" id="view-methodology" hidden>
+        <div class="page-heading"><div><div class="eyebrow">REPRODUCIBILITY OVER THEATRE</div><h1>Show your working.</h1><p>What the numbers mean, how they’re measured, and where they stop.</p></div></div>
+        <div class="method-grid"><section class="panel prose"><h2>Four dimensions, precisely defined</h2><dl><dt>Consistency</dt><dd>Fraction of baseline tasks where every repeat succeeds. Requires at least two repeats per task.</dd><dt>Robustness</dt><dd>Mean per-task ratio of fault-condition success to baseline success, capped at one. Tasks need a successful baseline.</dd><dt>Predictability</dt><dd>One minus Brier score: 1 − mean((confidence − outcome)²), on runs with confidence labels.</dd><dt>Safety</dt><dd>Fraction of runs with zero observed harmful actions under the task’s explicit evaluator. This does not measure every possible harm.</dd></dl><p>These operational metrics are inspired by <a href="https://proceedings.mlr.press/v306/rabanser26a.html" target="_blank" rel="noreferrer">Rabanser et al., 2026</a>. This is not an implementation of all twelve research metrics.</p></section><section class="panel prose"><h2>Read the fine print</h2><ul><li>Eight synthetic business workflows and two deterministic policy fixtures. No live LLM has been measured.</li><li>Twenty faults, applied once per run at an explicit tool/model boundary. Drift faults change the stub request; they do not establish model robustness.</li><li>95% percentile bootstrap intervals resample whole tasks, preserving repeated runs and conditions.</li><li>Eight tasks provide limited coverage. Zero-width intervals on fixtures do not establish certainty.</li><li>Stars are display bins: ceil(5 × score), from one to five. They are not a certification.</li><li>The dashboard shows one representative trace per task, condition, and agent; profile counts include all repeats.</li><li>Replay displays a recorded trace. Only the Python runner executes agents and independently evaluates the ledger.</li></ul></section></div>
+        <section class="panel prose"><h2>Reproduce it locally</h2><pre class="terminal"><span># From the repository root · Python 3.11+</span>
+python -m venv .venv
+source .venv/bin/activate
+pip install -e '.[dev]'
+pruefstand run --repeats 5 --seed 42 --out artifacts/run
+pruefstand gate \
+  --baseline benchmarks/baseline.json \
+  --candidate artifacts/run/profiles/idempotent-agent.json
+python -m pytest</pre><p>Core recording, replay, scoring, and the fixture suite have no third-party runtime dependencies. HTTP, DuckDB, telemetry, and agent frameworks are optional.</p><a class="button secondary" href="https://github.com/sohamshindework/pruefstand/tree/main/docs" target="_blank" rel="noreferrer">Read the full documentation ↗</a></section>
+      </section>
+      <footer><span>PRÜFSTAND <span class="muted">/ Built to find the breaking point.</span></span><span>Open source. Inspectable. Repeatable.</span></footer>
+    </main>
+  </div>
+  <div id="toast" role="status" hidden></div>
+  <dialog id="demo-dialog"><div class="dialog-heading"><div><div class="eyebrow">RECORDED CRASH TEST</div><h2 id="demo-title">Replaying a failure</h2></div><button class="icon-button" id="close-demo" aria-label="Close replay">×</button></div><p>This replays a recorded fixture. No payments or API calls are made.</p><div id="demo-timeline"></div><div id="demo-verdict" aria-live="polite"></div><button class="button primary" id="demo-fix" hidden>Replay with idempotency fix →</button></dialog>
+</body>
+</html>

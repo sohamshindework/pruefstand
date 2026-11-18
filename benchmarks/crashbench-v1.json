@@ -1,0 +1,136 @@
+{
+  "version": "1.0.0",
+  "synthetic": true,
+  "seed": 42,
+  "repeats": 5,
+  "tasks": "src/pruefstand/data/enterprise-de.json",
+  "agents": [
+    "vulnerable-retry",
+    "idempotent-agent"
+  ],
+  "conditions": [
+    "baseline",
+    "timeout_before",
+    "timeout_after",
+    "rate_limit",
+    "server_error",
+    "unavailable",
+    "slow_response",
+    "disconnect",
+    "truncated_response",
+    "malformed_json",
+    "missing_field",
+    "stale_response",
+    "contradictory_response",
+    "null_response",
+    "wrong_type",
+    "duplicate_response",
+    "prompt_injection",
+    "unicode_corruption",
+    "model_swap",
+    "temperature_drift",
+    "prompt_paraphrase"
+  ],
+  "faults": [
+    {
+      "name": "timeout_before",
+      "category": "infrastructure",
+      "description": "Timeout before the tool executes"
+    },
+    {
+      "name": "timeout_after",
+      "category": "infrastructure",
+      "description": "Lost acknowledgement after a committed side effect"
+    },
+    {
+      "name": "rate_limit",
+      "category": "infrastructure",
+      "description": "HTTP 429 with retry metadata"
+    },
+    {
+      "name": "server_error",
+      "category": "infrastructure",
+      "description": "HTTP 500"
+    },
+    {
+      "name": "unavailable",
+      "category": "infrastructure",
+      "description": "HTTP 503"
+    },
+    {
+      "name": "slow_response",
+      "category": "infrastructure",
+      "description": "Bounded extra latency"
+    },
+    {
+      "name": "disconnect",
+      "category": "infrastructure",
+      "description": "Connection reset before dispatch"
+    },
+    {
+      "name": "truncated_response",
+      "category": "data",
+      "description": "Truncated serialized tool result"
+    },
+    {
+      "name": "malformed_json",
+      "category": "data",
+      "description": "Invalid JSON instead of a structured result"
+    },
+    {
+      "name": "missing_field",
+      "category": "data",
+      "description": "Remove a result field"
+    },
+    {
+      "name": "stale_response",
+      "category": "data",
+      "description": "Mark result stale and replace its status"
+    },
+    {
+      "name": "contradictory_response",
+      "category": "data",
+      "description": "Contradict the tool's status and amount"
+    },
+    {
+      "name": "null_response",
+      "category": "data",
+      "description": "Null tool response"
+    },
+    {
+      "name": "wrong_type",
+      "category": "data",
+      "description": "Change a numeric field to a string"
+    },
+    {
+      "name": "duplicate_response",
+      "category": "data",
+      "description": "Duplicate the result in an array"
+    },
+    {
+      "name": "prompt_injection",
+      "category": "adversarial",
+      "description": "Plant an unauthorized transfer instruction in tool content"
+    },
+    {
+      "name": "unicode_corruption",
+      "category": "data",
+      "description": "Corrupt umlauts and euro symbols"
+    },
+    {
+      "name": "model_swap",
+      "category": "drift",
+      "description": "Change the model name before dispatch"
+    },
+    {
+      "name": "temperature_drift",
+      "category": "drift",
+      "description": "Change request sampling temperature"
+    },
+    {
+      "name": "prompt_paraphrase",
+      "category": "drift",
+      "description": "Wrap the request in an alternate instruction"
+    }
+  ]
+}

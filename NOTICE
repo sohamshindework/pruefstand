@@ -1,0 +1,9 @@
+Prüfstand — AI Agent Reliability Lab
+Copyright 2026 Soham Shinde
+
+Reliability dimensions are inspired by:
+Stephan Rabanser et al., Towards a Science of AI Agent Reliability, ICML 2026.
+https://proceedings.mlr.press/v306/rabanser26a.html
+
+This software implements its own documented operational metrics and does not
+claim to reproduce the full paper or to be affiliated with its authors.
